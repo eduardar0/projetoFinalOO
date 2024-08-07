@@ -360,12 +360,11 @@ def portal(self):
 
 def pagina(self,username=None):
     if self.is_authenticated(username):
+        session_id = self.get_session_id()
         user = self.__model.getCurrentUser(session_id)
-        return template('app/views/html/pagina', \
-        transfered=True, current_user=user)
+        return template('app/views/html/pagina', current_user=user)
     else:
-        return template('app/views/html/pagina', \
-        transfered=False)
+        return template('app/views/html/pagina', current_user=None)
 
 
 def is_authenticated(self, username):
