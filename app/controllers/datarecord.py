@@ -1,32 +1,50 @@
 from app.models.user_account import UserAccount
 import json
 import uuid
+import sqlite3
 
 class DataRecord:
     """Classe responsável por gerenciar a autenticação e os dados de usuários."""
 
-    def __init__(self):
-        """Inicializa o banco de dados, carregando usuários e autenticações atuais."""
-        self.__user_accounts = []  # Lista de contas de usuários
+    def __init__(self, db_name='app/controllers/db/user_accounts.db'):
+        """Inicializa a conexão com o banco de dados SQLite e cria a tabela de usuários se ela não existir."""
+        self.db_name = db_name
         self.__authenticated_users = {}  # Dicionário de usuários autenticados {session_id: user}
-        self.read()
+        self.create_table()
 
-    def read(self):
-        """Lê os dados do arquivo JSON e carrega as contas de usuários."""
-        try:
-            with open("app/controllers/db/user_accounts.json", "r") as arquivo_json:
-                user_data = json.load(arquivo_json)
-                self.__user_accounts = [UserAccount(**data) for data in user_data]
-        except FileNotFoundError:
-            self.__user_accounts.append(UserAccount('Guest', '010101', '101010'))
+#   def read(self):
+#        """Lê os dados do arquivo JSON e carrega as contas de usuários."""
+#        try:
+#            with open("app/controllers/db/user_accounts.json", "r") as arquivo_json:
+#                user_data = json.load(arquivo_json)
+#                self.__user_accounts = [UserAccount(**data) for data in user_data]
+#        except FileNotFoundError:
+#            self.__user_accounts.append(UserAccount('Guest', '010101', '101010'))
+
+    def create_table(self):
+        #Cria a tabela de usuários no banco de dados se ela não existir.
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL
+                )
+            ''')
+            conn.commit()
+
 
     def book(self, username, password):
-        """Registra um novo usuário e salva no arquivo JSON."""
-        new_user = UserAccount(username, password)
-        self.__user_accounts.append(new_user)
-        with open("app/controllers/db/user_accounts.json", "w") as arquivo_json:
-            user_data = [vars(user_account) for user_account in self.__user_accounts]
-            json.dump(user_data, arquivo_json)
+        """Registra um novo usuário no banco de dados SQLite."""
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+                conn.commit()
+            except sqlite3.IntegrityError:
+                print(f"Erro: O usuário {username} já está registrado.")
+##########################################################
 
     def getCurrentUser(self, session_id):
         """Retorna o usuário autenticado com base no ID da sessão."""
