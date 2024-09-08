@@ -1,7 +1,6 @@
-from app.models.user_account import UserAccount
-import json
 import uuid
 import sqlite3
+from app.models.user_account import UserAccount
 
 class DataRecord:
     """Classe responsável por gerenciar a autenticação e os dados de usuários."""
@@ -12,17 +11,8 @@ class DataRecord:
         self.__authenticated_users = {}  # Dicionário de usuários autenticados {session_id: user}
         self.create_table()
 
-#   def read(self):
-#        """Lê os dados do arquivo JSON e carrega as contas de usuários."""
-#        try:
-#            with open("app/controllers/db/user_accounts.json", "r") as arquivo_json:
-#                user_data = json.load(arquivo_json)
-#                self.__user_accounts = [UserAccount(**data) for data in user_data]
-#        except FileNotFoundError:
-#            self.__user_accounts.append(UserAccount('Guest', '010101', '101010'))
-
     def create_table(self):
-        #Cria a tabela de usuários no banco de dados se ela não existir.
+        """Cria a tabela de usuários no banco de dados se ela não existir."""
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -34,7 +24,6 @@ class DataRecord:
             ''')
             conn.commit()
 
-
     def book(self, username, password):
         """Registra um novo usuário no banco de dados SQLite."""
         with sqlite3.connect(self.db_name) as conn:
@@ -44,7 +33,20 @@ class DataRecord:
                 conn.commit()
             except sqlite3.IntegrityError:
                 print(f"Erro: O usuário {username} já está registrado.")
-##########################################################
+
+    def checkUser(self, username, password):
+        """Verifica se o usuário está no banco de dados e gera um ID único para a sessão."""
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+            user_data = cursor.fetchone()
+
+            if user_data:  # Se o usuário estiver no banco de dados, cria um ID de sessão
+                session_id = str(uuid.uuid4())  # Gera um ID de sessão único
+                user = UserAccount(username, password)
+                self.__authenticated_users[session_id] = user
+                return session_id  # Retorna o ID de sessão para o usuário
+            return None
 
     def getCurrentUser(self, session_id):
         """Retorna o usuário autenticado com base no ID da sessão."""
@@ -61,15 +63,6 @@ class DataRecord:
             if username == user.username:
                 return session_id
         return None  # Retorna None se o usuário não for encontrado
-
-    def checkUser(self, username, password):
-        """Verifica as credenciais do usuário e retorna um ID de sessão único se a autenticação for bem-sucedida."""
-        for user in self.__user_accounts:
-            if user.username == username and user.password == password:
-                session_id = str(uuid.uuid4())  # Gera um ID de sessão único
-                self.__authenticated_users[session_id] = user
-                return session_id  # Retorna o ID de sessão para o usuário
-        return None
 
     def logout(self, session_id):
         """Remove o usuário autenticado do dicionário, efetivamente realizando o logout."""

@@ -24,6 +24,12 @@
                 </div>
                 <button type="submit">Login</button>
             </form>
+
+            <!-- Botão para cadastro de novo usuário -->
+            <div class="form-group">
+                <p>Não tem uma conta?</p>
+                <a href="/register"><button type="button">Cadastrar novo usuário</button></a>
+            </div>
         </div>
     </div>
 </body>
