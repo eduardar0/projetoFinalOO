@@ -9,14 +9,10 @@ class Application:
             'portal': self.portal,
             'register': self.register_page
         }
-        self.__model = DataRecord()
+        self.model = DataRecord()
         self.__current_username = None
 
     def render(self, page, parameter=None, **kwargs):
-        """
-        Renderiza a página solicitada. Se um parâmetro ou variáveis extras (kwargs) forem fornecidos,
-        eles são passados para a função de renderização da página.
-        """
         content = self.pages.get(page, self.helper)
         if parameter is None:
             return content(**kwargs)
@@ -31,14 +27,15 @@ class Application:
         if not session_id:
             print("No session ID found in cookie.")
         return session_id
+    
 
     def login(self):
         username = request.forms.get('username')
         password = request.forms.get('password')
         session_id = self.__model.checkUser(username, password)
         if session_id:
-            # Definir o cookie de sessão
-            response.set_cookie('session_id', session_id)
+            # Definir o cookie de sessão com o ID da sessão
+            response.set_cookie('session_id', session_id, path='/')
             return "Login successful"
         else:
             return "Invalid credentials"
@@ -56,7 +53,6 @@ class Application:
         return template('app/views/html/portal')
 
     def pagina(self, username=None):
-        # Renderiza a página principal, verificando a autenticação
         if self.is_authenticated(username):
             session_id = self.get_session_id()
             user = self.__model.getCurrentUser(session_id)
@@ -64,10 +60,7 @@ class Application:
         else:
             return template('app/views/html/pagina', current_user=None)
 
-
-
     def is_authenticated(self, username):
-        # Verifica se o nome de usuário está autenticado comparando com o nome associado ao ID da sessão.
         session_id = self.get_session_id()
         if not session_id:
             print("No session ID available.")
@@ -100,21 +93,16 @@ class Application:
             username = request.forms.get('username')
             password = request.forms.get('password')
             confirm_password = request.forms.get('confirm_password')
-            #codigo para formulario
 
             if password != confirm_password:
                 return template('app/views/html/register', error="Senhas não coincidem.")
-            #para testar a senha
-        
 
             try:
-                self.__model.book(username, password)
+                self.__model.book(self.get_session_id(), username, password)
                 session_id = self.__model.checkUser(username, password)
                 if session_id:
                     response.set_cookie('session_id', session_id, path='/')
                     return redirect('/pagina')
-                
-                
                 else:
                     return template('app/views/html/register', error="Erro ao autenticar após o registro.")
             except sqlite3.IntegrityError:
