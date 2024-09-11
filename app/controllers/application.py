@@ -30,7 +30,7 @@ class Application:
     
     def get_username_by_session(self, session_id):
         # Supondo que o método getUserBySessionId existe no DataRecord para buscar o nome pelo session_id
-        return self.model.getUserBySessionId(session_id)
+        return self.model.get_username(session_id)
     
 
     def login(self):
@@ -56,13 +56,14 @@ class Application:
                 return template('app/views/html/portal', error="Login inválido.")
         return template('app/views/html/portal')
 
-    def pagina(self, username=None):
-        if self.is_authenticated(username):
+    def pagina(self, user_name=None):
+        if self.is_authenticated(user_name):
             session_id = self.get_session_id()
             user = self.model.getCurrentUser(session_id)
-            return template('app/views/html/pagina', current_user=user)
+            return template('app/views/html/pagina', current_user=user, user_name=user_name)
         else:
-            return template('app/views/html/pagina', current_user=None)
+            return template('app/views/html/pagina', current_user=None, user_name=user_name)
+
 
     def is_authenticated(self, username):
         session_id = self.get_session_id()

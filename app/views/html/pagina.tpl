@@ -8,8 +8,9 @@
 </head>
 <body>
     <div class="container">
-    <h1>Aqui vão estar as musicas de cada usuario</h1>
-
+            <h1>Bem-vindo, {{user_name}}!</h1> <!-- Mostra o nome do usuário -->
+        <h2>Aqui vão estar as músicas de cada usuário</h2>
+        <!-- Adicione o restante do conteúdo aqui -->
     </div>
 </body>
 </html>
