@@ -46,7 +46,7 @@ def action_portal():
 def logout():
     ctl.logout_user()
     response.delete_cookie('session_id')
-    return redirect('/helper')
+    return redirect('/portal')
 
 @app.route('/register', method='GET')
 def register_page():

@@ -8,9 +8,13 @@
 </head>
 <body>
     <div class="container">
-            <h1>Bem-vindo, {{user_name}}!</h1> <!-- Mostra o nome do usuário -->
+        <h1>Bem-vindo, {{ user_name }}!</h1> <!-- Mostra o nome do usuário -->
         <h2>Aqui vão estar as músicas de cada usuário</h2>
-        <!-- Adicione o restante do conteúdo aqui -->
+
+        <!-- Botão de Logout -->
+        <form action="/logout" method="post">
+            <button type="submit">Logout</button>
+        </form>
     </div>
 </body>
 </html>
