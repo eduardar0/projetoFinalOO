@@ -28,11 +28,15 @@ class Application:
             print("No session ID found in cookie.")
         return session_id
     
+    def get_username_by_session(self, session_id):
+        # Supondo que o método getUserBySessionId existe no DataRecord para buscar o nome pelo session_id
+        return self.model.getUserBySessionId(session_id)
+    
 
     def login(self):
         username = request.forms.get('username')
         password = request.forms.get('password')
-        session_id = self.__model.checkUser(username, password)
+        session_id = self.model.checkUser(username, password)
         if session_id:
             # Definir o cookie de sessão com o ID da sessão
             response.set_cookie('session_id', session_id, path='/')
@@ -47,7 +51,7 @@ class Application:
             session_id, username = self.authenticate_user(username, password)
             if session_id:
                 response.set_cookie('session_id', session_id, path='/')
-                return redirect('/pagina')
+                return template('app/views/html/pagina.tpl', current_user=user)
             else:
                 return template('app/views/html/portal', error="Login inválido.")
         return template('app/views/html/portal')
@@ -55,7 +59,7 @@ class Application:
     def pagina(self, username=None):
         if self.is_authenticated(username):
             session_id = self.get_session_id()
-            user = self.__model.getCurrentUser(session_id)
+            user = self.model.getCurrentUser(session_id)
             return template('app/views/html/pagina', current_user=user)
         else:
             return template('app/views/html/pagina', current_user=None)
@@ -66,7 +70,7 @@ class Application:
             print("No session ID available.")
             return False
 
-        current_username = self.__model.getUserName(session_id)
+        current_username = self.model.getUserName(session_id)
         if current_username is None:
             print(f"User not found for session ID: {session_id}")
             return False
@@ -75,18 +79,18 @@ class Application:
         return username == current_username
 
     def authenticate_user(self, username, password):
-        session_id = self.__model.checkUser(username, password)
+        session_id = self.model.checkUser(username, password)
         if session_id:
-            self.logout_user()
-            self.__current_username = self.__model.getUserName(session_id)
-            return session_id, username
-        return None, None
+            self.__current_username = self.model.get_username(session_id)  # Usa o novo método
+            return session_id, self.__current_username
+        else:
+            return None, None
 
     def logout_user(self):
         self.__current_username = None
         session_id = self.get_session_id()
         if session_id:
-            self.__model.logout(session_id)
+            self.model.logout(session_id)
 
     def register_page(self, error=None):
         if request.method == 'POST':
@@ -98,8 +102,8 @@ class Application:
                 return template('app/views/html/register', error="Senhas não coincidem.")
 
             try:
-                self.__model.book(self.get_session_id(), username, password)
-                session_id = self.__model.checkUser(username, password)
+                self.model.book(self.get_session_id(), username, password)
+                session_id = self.model.checkUser(username, password)
                 if session_id:
                     response.set_cookie('session_id', session_id, path='/')
                     return redirect('/pagina')

@@ -26,9 +26,12 @@ def login():
 def action_portal():
     username = request.forms.get('username')
     password = request.forms.get('password')
-    session_id, username = ctl.authenticate_user(username, password)
+    session_id, user_name = ctl.authenticate_user(username, password)
+    
+    print(f"Session ID: {session_id}")  # Verifica se o ID de sessão está sendo gerado
+
     if session_id:
-        response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
+        response.set_cookie('session_id', session_id, httponly=True, max_age=3600)
         return redirect('/pagina')
     else:
         return redirect('/portal')
@@ -40,20 +43,6 @@ def logout():
     return redirect('/helper')
 
 
-@app.route('/create-admin', method='POST')
-def create_admin():
-    data_record = DataRecord()
-    try:
-        with sqlite3.connect(data_record.db_name) as conn:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)", 
-                           ('admin', 'adminpassword', 1))  # Substitua com as credenciais desejadas
-            conn.commit()
-        return "Administrador criado com sucesso!"
-    except sqlite3.Error as e:
-        print(f"Erro ao criar administrador: {e}")
-        return "Erro ao criar administrador."
-    
 @app.route('/register', method='GET')
 def register_page():
     return ctl.register_page()

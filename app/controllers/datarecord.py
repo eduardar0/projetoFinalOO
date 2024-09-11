@@ -59,6 +59,13 @@ class DataRecord:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM users")
             return cursor.fetchall()
+        
+    def get_username(self, session_id):
+        """Retorna o nome de usuário associado ao session_id."""
+        user = self.__authenticated_users.get(session_id)  # Obtém o objeto UserAccount pela session_id
+        if user:
+            return user.username  # Retorna o nome de usuário
+        return None  # Se a sessão não for encontrada, retorna None
 
     def update_user(self, session_id, user_id, new_username=None, new_password=None):
         """Atualiza o username e/ou password de um usuário específico, apenas para administradores."""
