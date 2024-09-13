@@ -56,13 +56,15 @@ class Application:
                 return template('app/views/html/portal', error="Login inválido.")
         return template('app/views/html/portal')
 
-    def pagina(self, user_name=None):
+    def pagina(self, user_name=None, tasks= None):
         if self.is_authenticated(user_name):
             session_id = self.get_session_id()
             user = self.model.getCurrentUser(session_id)
-            return template('app/views/html/pagina', current_user=user, user_name=user_name)
+            tasks = self.model.get_tasks(session_id)
+            return template('app/views/html/pagina', current_user=user, user_name=user_name, tasks=tasks)
         else:
-            return template('app/views/html/pagina', current_user=None, user_name=user_name)
+            return template('app/views/html/pagina', current_user=None, user_name=user_name, tasks = tasks)
+        
 
 
     def is_authenticated(self, username):
@@ -113,3 +115,7 @@ class Application:
             except sqlite3.IntegrityError:
                 return template('app/views/html/register', error="O nome de usuário já existe. Tente outro.")
         return template('app/views/html/register', error=error)
+    
+    def get_tasks(self, session_id):
+        """Chama o método get_tasks_ do DataRecord."""
+        return self.model.get_tasks(session_id)

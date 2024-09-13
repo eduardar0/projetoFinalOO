@@ -3,6 +3,7 @@ from bottle import Bottle, request, static_file, redirect, template, response, T
 import sqlite3
 from app.controllers.datarecord import DataRecord
 
+db = DataRecord()
 app = Bottle()
 ctl = Application()
 
@@ -20,9 +21,10 @@ def helper():
 @app.route('/pagina', methods=['GET'])
 @app.route('/pagina/<user_name>', methods=['GET'])
 def pagina(user_name=None):
-    session_id = ctl.get_session_id()
-    user_name = ctl.get_username_by_session(session_id)
-    return ctl.pagina(user_name)
+    session_id = ctl.get_session_id()  # Obtém o ID da sessão
+    user_name = ctl.get_username_by_session(session_id)  # Obtém o nome de usuário
+    tasks = ctl.get_tasks(session_id)  # Obtém as tarefas associadas ao usuário
+    return ctl.pagina(user_name, tasks)
 
 @app.route('/portal', method='GET')
 def login():
@@ -73,6 +75,30 @@ def register_user():
         return template('register', error="O nome de usuário já existe. Tente outro.")
     except Exception as e:
         return template('portal', error=f"Erro inesperado: {e}")
+
+
+##### --- tarefaas 
+
+@app.route('/pagina/add_task', method='POST')
+def add_task():
+    session_id = request.get_cookie('session_id')
+    task_description = request.forms.get('task_description')
+    if session_id and task_description:
+        ctl.model.add_task(session_id, task_description)
+        return redirect('/pagina')
+    return "Erro ao adicionar tarefa."
+
+@app.route('/pagina/delete_task', method='POST')
+def delete_task():
+    session_id = request.get_cookie('session_id')
+    task_id = request.forms.get('task_id')
+    if session_id and task_id:
+        ctl.model.delete_task(session_id, task_id)
+        return redirect('/pagina')
+    return "Erro ao excluir tarefa."
+
+
+
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8084, debug=True)

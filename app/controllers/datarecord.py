@@ -27,7 +27,15 @@ class DataRecord:
                         is_admin INTEGER DEFAULT 0
                     )
                 ''')
-                conn.commit()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS tasks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    description TEXT NOT NULL,
+                    FOREIGN KEY(user_id) REFERENCES users(id)
+                )
+            ''')
+            conn.commit()
         except sqlite3.OperationalError as e:
             print(f"Erro ao abrir o banco de dados: {e}")
 
@@ -60,7 +68,7 @@ class DataRecord:
             cursor.execute("SELECT * FROM users")
             return cursor.fetchall()
         
-    def get_username(self, session_id):
+    def get_username(self, session_id): ########
         """Retorna o nome de usuário associado ao session_id."""
         user = self.__authenticated_users.get(session_id)  # Obtém o objeto UserAccount pela session_id
         if user:
@@ -139,3 +147,63 @@ class DataRecord:
 
 
 #sqlite3 /mnt/c/Users/Joelma/Documents/bonusPF/bmvc/app/controllers/db/user_accounts.db
+
+####funções para as tarefas
+
+    # def get_user_id(self, username):
+    # #"""Obtém o ID do usuário com base no nome de usuário."""
+    #     with sqlite3.connect(self.db_name) as conn:  # Abre uma conexão com o banco de dados SQLite.
+    #         cursor = conn.cursor()  # Cria um cursor para executar comandos SQL.
+    #         cursor.execute("SELECT id FROM users WHERE username = ?", (username,))  # Busca o ID do usuário pelo nome de usuário.
+    #         user_data = cursor.fetchone()  # Obtém a primeira linha do resultado.
+    #         return user_data[0] if user_data else None  # Retorna o ID do usuário ou None se o usuário não existir.
+
+
+
+    def add_task(self, session_id, description):
+        """Adiciona uma nova tarefa para o usuário autenticado."""
+        user = self.getCurrentUser(session_id)  # Obtém o usuário autenticado com base no ID da sessão.
+        if user:  # Se o usuário estiver autenticado:
+            with sqlite3.connect(self.db_name) as conn:  # Abre uma conexão com o banco de dados SQLite.
+                cursor = conn.cursor()  # Cria um cursor para executar comandos SQL.
+            
+            # Busca o ID do usuário pelo nome de usuário.
+                cursor.execute("SELECT id FROM users WHERE username = ?", (user.username,))
+                user_data = cursor.fetchone()
+            
+                if user_data:  # Verifica se o usuário foi encontrado.
+                    user_id = user_data[0]
+                    cursor.execute("INSERT INTO tasks (user_id, description) VALUES (?, ?)", 
+                                (user_id, description))  # Insere uma nova tarefa para o usuário autenticado.
+                    conn.commit()  # Confirma as alterações no banco de dados.
+                    print(f"Tarefa '{description}' adicionada para o usuário {user.username}.")
+                else:
+                    print("Erro: Usuário não encontrado no banco de dados.")
+        else:
+            print("Erro: Usuário não autenticado.")  # Exibe erro se o usuário não estiver autenticado.
+# Exibe erro se o usuário não estiver autenticado.
+
+    def delete_task(self, session_id, task_id):
+        """Remove uma tarefa associada ao usuário autenticado."""
+        user = self.getUserSessionId(session_id)
+        if user:
+            with sqlite3.connect(self.db_name) as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM tasks WHERE id = ? AND user_id = ?", 
+                            (task_id, self.get_user_id(user.username)))
+                conn.commit()
+                print(f"Tarefa {task_id} removida para o usuário {user.username}.")
+        else:
+            print("Erro: Usuário não autenticado.")
+            
+    def get_tasks(self, session_id):
+        """Retorna todas as tarefas associadas ao usuário autenticado."""
+        user = self.getUserSessionId(session_id)
+        if user:
+            with sqlite3.connect(self.db_name) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM tasks WHERE user_id = ?", (self.get_user_id(user.username),))
+                return cursor.fetchall()
+        else:
+            print("Erro: Usuário não autenticado.")
+            return []
