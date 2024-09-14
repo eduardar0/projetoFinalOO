@@ -6,7 +6,7 @@ from app.models.user_account import UserAccount
 class DataRecord:
     """Classe responsável por gerenciar a autenticação e os dados de usuários."""
 
-    def __init__(self, db_name='/mnt/c/Users/Joelma/Documents/bonusPF/bmvc/app/controllers/db/user_accounts.db'):
+    def __init__(self, db_name='app/controllers/db/user_accounts.db'):
         """Inicializa a conexão com o banco de dados SQLite e cria a tabela de usuários se ela não existir."""
         # Gera o caminho absoluto para o banco de dados
         self.db_name = os.path.abspath(db_name)
@@ -57,15 +57,19 @@ class DataRecord:
                 print(f"Erro: O usuário {username} já está registrado.")
                 raise
 
-    def get_all_users(self, session_id):
+    def get_all_users(self, session_id, admin_only):
         """Retorna todos os usuários do banco de dados, apenas para administradores."""
-        if not self.is_admin(session_id):
-            print("Acesso negado: apenas administradores podem visualizar todos os usuários.")
-            return []
+        if admin_only:
+            if session_id is None or not self.is_admin(session_id):
+              print("Acesso negado: apenas administradores podem visualizar todos os usuários.")
+              return []
         #### cRud (READ)
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM users")
+            if admin_only:
+               cursor.execute("SELECT * FROM users")
+            else:
+                cursor.execute("SELECT username, password FROM users")
             return cursor.fetchall()
         
     def get_username(self, session_id): ########
@@ -101,6 +105,26 @@ class DataRecord:
             cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
             conn.commit()
             print(f"Usuário {user_id} removido com sucesso.")
+
+    def delete_account(self, session_id ):
+        """Remove a conta do usuário logado"""
+        user = self.getCurrentUser(session_id)
+        if user:
+            username = user.username
+            with sqlite3.connect(self.db_name) as conn:
+               cursor = conn.cursor()
+               cursor.execute("DELETE FROM users WHERE username = ?", (username,))
+               conn.commit()
+               print(f"Usuário {username} excluído com sucesso!")
+
+               if session_id in self.__authenticated_users:
+                    del self.__authenticated_users[session_id]
+                    print(f"Session ID '{session_id}' removido da lista de usuários autenticados")
+        else:
+            print("Nenhum usuário logado para exclusão")
+    
+
+
 
     def checkUser(self, username, password):
         """Verifica se o usuário está no banco de dados e gera um ID único para a sessão."""
@@ -143,6 +167,16 @@ class DataRecord:
         """Remove o usuário autenticado do dicionário, efetivamente realizando o logout."""
         if session_id in self.__authenticated_users:
             del self.__authenticated_users[session_id]
+
+    def getUserPassword(self, username):
+        """Retorna a senha do usuário com base no nome de usuário."""
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+            password = cursor.fetchone()
+            return password[0] if password else None
+        
+   
 
 
 

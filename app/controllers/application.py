@@ -7,7 +7,9 @@ class Application:
         self.pages = {
             'pagina': self.pagina,
             'portal': self.portal,
-            'register': self.register_page
+            'register': self.register_page,
+            'dados': self.dados,
+            'delete_account_confirm': self.delete_account_confirm
         }
         self.model = DataRecord()
         self.__current_username = None
@@ -51,7 +53,7 @@ class Application:
             session_id, username = self.authenticate_user(username, password)
             if session_id:
                 response.set_cookie('session_id', session_id, path='/')
-                return template('app/views/html/pagina.tpl', current_user=user)
+                return template('app/views/html/pagina.tpl', current_user=username)
             else:
                 return template('app/views/html/portal', error="Login inválido.")
         return template('app/views/html/portal')
@@ -65,6 +67,29 @@ class Application:
         else:
             return template('app/views/html/pagina', current_user=None, user_name=user_name, tasks = tasks)
         
+
+    def dados(self, username=None):
+        session_id = self.get_session_id()
+        if session_id:
+            user = self.model.getCurrentUser(session_id)
+            if user:
+               
+               username = username
+               password = self.model.getUserPassword(username)
+               return template('app/views/html/dados', current_user=user, username=username, password=password)
+        return template('app/views/html/pagina', current_user=None, username=None, password=password)
+    
+    def delete_account_confirm(self):
+        session_id = request.get_cookie('session_id')  # Obtém o ID da sessão do cookie
+        if session_id:
+          self.model.delete_account(session_id)
+          return template('app/views/html/portal')  # Redireciona para a página de logout ou qualquer outra página desejada
+        else:
+           return "Você não está logado."
+  
+         
+
+          
 
 
     def is_authenticated(self, username):

@@ -15,14 +15,14 @@
             <form action="/portal" method="POST">
                 <!-- Formulário de login -->
                 <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="username">Usuário:</label>
+                    <input type="text" id="username" name="username" placeholder="Digite seu nome de usuário" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit">Entrar</button>
             </form>
 
             <!-- Botão para cadastro de novo usuário -->

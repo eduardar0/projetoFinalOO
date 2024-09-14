@@ -23,6 +23,11 @@
             <button type="submit">Logout</button>
         </form>
 
+        <!-- Botão para visualizar os dados -->
+        <form action="/dados" method="get">
+            <button type="submit">Meus Dados</button>
+        </form>
+
         <!-- Lista de tarefas -->
         <ul>
             % for task in tasks:
@@ -31,4 +36,6 @@
         </ul>
     </div>
 </body>
+</html>
+
 </html>
