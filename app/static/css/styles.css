@@ -47,17 +47,35 @@ input[type="password"] {
 }
 
 button {
-    background-color: #fd0f5e;
+    background-color:#fd0f5e;
     color: white;
     padding: 12px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    display: block;
-    margin: 20px auto 0; /* Centraliza o botão horizontalmente e adiciona espaço acima */
+    display: inline-block;
+    text-align: center;
+    text-decoration: none; /* Remove o sublinhado dos links */
     font-size: 16px;
+    margin: 10px 0; /* Adiciona espaçamento acima e abaixo */
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #660022;
+    background-color:  #660022;
+}
+
+/* Estilo do botão quando está ativo */
+.button:active {
+    background-color: #004494;
+}
+/* styles.css */
+.task-list {
+    list-style-type: none; /* Remove marcadores da lista */
+    padding: 0; /* Remove padding padrão */
+}
+.task-item {
+    margin-bottom: 10px; /* Adiciona espaçamento entre os itens */
+    border-bottom: 1px solid #ddd; /* Adiciona uma linha abaixo de cada item */
+    padding-bottom: 5px; /* Adiciona espaçamento interno */
 }

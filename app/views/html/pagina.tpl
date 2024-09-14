@@ -9,7 +9,17 @@
 <body>
     <div class="container">
         <h1>Bem-vindo, {{ user_name }}!</h1>
-        <h2>Aqui estão suas tarefas:</h2>
+          <h2>Aqui estão suas tarefas:</h2>
+
+
+
+     <ul>
+            <li>{{tasks}}</li>
+ 
+
+                    
+                
+    </ul>
 
         <!-- Formulário para adicionar novas tarefas -->
         <form action="/pagina/add_task" method="post">
@@ -28,12 +38,6 @@
             <button type="submit">Meus Dados</button>
         </form>
 
-        <!-- Lista de tarefas -->
-        <ul>
-            % for task in tasks:
-                <li>{{ task[2] }} <!-- task[2] contém a descrição da tarefa --></li>
-            % endfor
-        </ul>
     </div>
 </body>
 </html>

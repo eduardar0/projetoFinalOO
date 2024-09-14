@@ -65,7 +65,7 @@ class Application:
             tasks = self.model.get_tasks(session_id)
             return template('app/views/html/pagina', current_user=user, user_name=user_name, tasks=tasks)
         else:
-            return template('app/views/html/pagina', current_user=None, user_name=user_name, tasks = tasks)
+            return template('pagina', current_user=user, user_name=user_name, tasks=tasks)
         
 
     def dados(self, username=None):
@@ -143,4 +143,6 @@ class Application:
     
     def get_tasks(self, session_id):
         """Chama o método get_tasks_ do DataRecord."""
-        return self.model.get_tasks(session_id)
+        taskses= self.model.get_tasks(session_id)
+        for task in taskses:
+            return task
