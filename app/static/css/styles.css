@@ -70,3 +70,13 @@ input[type="password"] {
 .button:active {
     background-color: #004494;
 }
+/* styles.css */
+.task-list {
+    list-style-type: none; /* Remove marcadores da lista */
+    padding: 0; /* Remove padding padrão */
+}
+.task-item {
+    margin-bottom: 10px; /* Adiciona espaçamento entre os itens */
+    border-bottom: 1px solid #ddd; /* Adiciona uma linha abaixo de cada item */
+    padding-bottom: 5px; /* Adiciona espaçamento interno */
+}

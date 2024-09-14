@@ -23,7 +23,11 @@ def helper():
 def pagina(user_name=None):
     session_id = ctl.get_session_id()  # Obtém o ID da sessão
     user_name = ctl.get_username_by_session(session_id)  # Obtém o nome de usuário
-    tasks = ctl.get_tasks(session_id)  # Obtém as tarefas associadas ao usuário
+    piu = ctl.get_tasks(session_id)  # Obtém as tarefas associadas ao usuário
+    tasks = []
+    for task in tasks:
+        tasks.append(f"{task}\n")  
+
     return ctl.pagina(user_name, tasks)
 
 @app.route('/portal', method='GET')
@@ -101,4 +105,4 @@ def delete_task():
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8085, debug=True)
+    app.run(host='localhost', port=8086, debug=True)

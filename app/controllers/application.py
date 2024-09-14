@@ -118,4 +118,6 @@ class Application:
     
     def get_tasks(self, session_id):
         """Chama o método get_tasks_ do DataRecord."""
-        return self.model.get_tasks(session_id)
+        taskses= self.model.get_tasks(session_id)
+        for task in taskses:
+            return task
