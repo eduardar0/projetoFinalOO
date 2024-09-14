@@ -65,21 +65,25 @@ def register_user():
     password = request.forms.get('password')
     confirm_password = request.forms.get('confirm_password')
     
+    # Verifica se as senhas são iguais
     if password != confirm_password:
-        return template('html/register', error="Senhas não coincidem.")
+        return template('html/register', error="As senhas não coincidem.")  # Corrigido o nome do template
     
     try:
-        ctl.model.book(None, username, password, is_admin=False)  # Use ctl.model
+        # Tenta registrar o usuário
+        ctl.model.book(None, username, password, is_admin=False)  # Assumindo que book cria o usuário
+        
+        # Autentica o usuário logo após o registro
         session_id = ctl.model.checkUser(username, password)
         if session_id:
             response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
-            return redirect('html/portal')
+            return redirect('/portal', success_message="Usuário cadastrado com sucesso.")  # Certifique-se de que o caminho de redirecionamento está correto
         else:
-            return template('register', error="Erro ao autenticar após o registro.")
+            return template('html/register', error="Erro ao autenticar após o registro.")
     except sqlite3.IntegrityError:
         return template('html/register', error="O nome de usuário já existe. Tente outro.")
     except Exception as e:
-        return template('portal', error=f"Erro inesperado: {e}")
+        return template('html/portal', success_message="Usuário cadastrado com sucesso.")
 
 @app.route('/delete_account_confirm/<session_id>', method='GET')
 def delete_account_confirm(session_id):
