@@ -101,4 +101,4 @@ def delete_task():
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8084, debug=True)
+    app.run(host='localhost', port=8085, debug=True)

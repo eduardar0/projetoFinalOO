@@ -46,18 +46,27 @@ input[type="password"] {
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-button {
+.button {
     background-color: #007BFF;
     color: white;
     padding: 12px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    display: block;
-    margin: 20px auto 0; /* Centraliza o botão horizontalmente e adiciona espaço acima */
+    display: inline-block;
+    text-align: center;
+    text-decoration: none; /* Remove o sublinhado dos links */
     font-size: 16px;
+    margin: 10px 0; /* Adiciona espaçamento acima e abaixo */
+    transition: background-color 0.3s ease;
 }
 
-button:hover {
+/* Estilo do botão quando o mouse passa sobre ele */
+.button:hover {
     background-color: #0056b3;
+}
+
+/* Estilo do botão quando está ativo */
+.button:active {
+    background-color: #004494;
 }

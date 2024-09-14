@@ -63,7 +63,7 @@ class Application:
             tasks = self.model.get_tasks(session_id)
             return template('app/views/html/pagina', current_user=user, user_name=user_name, tasks=tasks)
         else:
-            return template('app/views/html/pagina', current_user=None, user_name=user_name, tasks = tasks)
+            return template('pagina', current_user=user, user_name=user_name, tasks=tasks)
         
 
 

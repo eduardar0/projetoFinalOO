@@ -10,7 +10,6 @@ def main():
         print("Superusuário autenticado com sucesso.")
         
         # Tenta criar um novo usuário administrador
-        data_record.book(session_id, 'novo_usuario', 'nova_senha', is_admin=True)
 
         # Liste todos os usuários (só pode ser feito por administradores)
         #cRud (READ)
