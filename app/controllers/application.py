@@ -46,6 +46,26 @@ class Application:
         else:
             return "Invalid credentials"
         
+
+    def dados(self, username=None):
+        session_id = self.get_session_id()
+        if session_id:
+            user = self.model.getCurrentUser(session_id)
+            if user:
+                username = username
+                password = self.model.getUserPassword(username)
+                return template('app/views/html/dados', current_user=user, username=username, password=password)
+        return template('app/views/html/pagina', current_user=None, username=None, password=password)
+    
+    def delete_account_confirm(self):
+        session_id = request.get_cookie('session_id')  # Obtém o ID da sessão do cookie
+        if session_id:
+            self.model.delete_account(session_id)
+            return template('app/views/html/portal')  # Redireciona para a página de logout ou qualquer outra página desejada
+        else:
+            return "Você não está logado."
+
+
     def portal(self):
         if request.method == 'POST':
             username = request.forms.get('username')
@@ -53,43 +73,20 @@ class Application:
             session_id, username = self.authenticate_user(username, password)
             if session_id:
                 response.set_cookie('session_id', session_id, path='/')
-                return template('app/views/html/pagina.tpl', current_user=username)
+                return template('html/pagina.tpl', current_user=user)
             else:
-                return template('app/views/html/portal', error="Login inválido.")
-        return template('app/views/html/portal')
+                return template('html/portal', error="Login inválido.")
+        return template('html/portal')
 
     def pagina(self, user_name=None, tasks= None):
         if self.is_authenticated(user_name):
             session_id = self.get_session_id()
             user = self.model.getCurrentUser(session_id)
             tasks = self.model.get_tasks(session_id)
-            return template('app/views/html/pagina', current_user=user, user_name=user_name, tasks=tasks)
+            return template('html/pagina', current_user=user, user_name=user_name, tasks=tasks)
         else:
-            return template('pagina', current_user=user, user_name=user_name, tasks=tasks)
+            return template('html/pagina', current_user=user, user_name=user_name, tasks=tasks)
         
-
-    def dados(self, username=None):
-        session_id = self.get_session_id()
-        if session_id:
-            user = self.model.getCurrentUser(session_id)
-            if user:
-               
-               username = username
-               password = self.model.getUserPassword(username)
-               return template('app/views/html/dados', current_user=user, username=username, password=password)
-        return template('app/views/html/pagina', current_user=None, username=None, password=password)
-    
-    def delete_account_confirm(self):
-        session_id = request.get_cookie('session_id')  # Obtém o ID da sessão do cookie
-        if session_id:
-          self.model.delete_account(session_id)
-          return template('app/views/html/portal')  # Redireciona para a página de logout ou qualquer outra página desejada
-        else:
-           return "Você não está logado."
-  
-         
-
-          
 
 
     def is_authenticated(self, username):

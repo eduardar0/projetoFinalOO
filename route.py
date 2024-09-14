@@ -8,7 +8,7 @@ app = Bottle()
 ctl = Application()
 
 # Configura o caminho para a pasta de templates
-TEMPLATE_PATH.insert(0, '/app/views')
+TEMPLATE_PATH.insert(0, './app/views')
 
 @app.route('/static/<filepath:path>')
 def serve_static(filepath):
@@ -26,13 +26,10 @@ def pagina(user_name=None):
     piu = ctl.get_tasks(session_id)  # Obtém as tarefas associadas ao usuário
     tasks = []
     for task in tasks:
+        tasks.append(f"{task}")
         tasks.append(f"{task}\n")  
 
     return ctl.pagina(user_name, tasks)
-
-@app.route('/dados', method = ['GET','POST'])
-def dados():
-    return ctl.render('dados')
 
 @app.route('/portal', method='GET')
 def login():
@@ -52,16 +49,6 @@ def action_portal():
     else:
         return redirect('/portal')
 
-@app.route('/delete_account_confirm/<session_id>', method='GET')
-def delete_account_confirm(session_id):
-    return template('app/views/html/delete_account_confirm', session_id=session_id)
-
-@app.route('/delete_account_confirm', method='POST')
-def delete_account_confirm(): 
-    ctl.delete_account_confirm()
-    return redirect('/portal')
- 
-    
 @app.route('/logout', method='POST')
 def logout():
     ctl.logout_user()
@@ -74,10 +61,34 @@ def register_page():
 
 @app.route('/register', method='POST')
 def register_user():
-    return ctl.register_page()
+    username = request.forms.get('username')
+    password = request.forms.get('password')
+    confirm_password = request.forms.get('confirm_password')
+    
+    if password != confirm_password:
+        return template('html/register', error="Senhas não coincidem.")
+    
+    try:
+        ctl.model.book(None, username, password, is_admin=False)  # Use ctl.model
+        session_id = ctl.model.checkUser(username, password)
+        if session_id:
+            response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
+            return redirect('html/portal')
+        else:
+            return template('register', error="Erro ao autenticar após o registro.")
+    except sqlite3.IntegrityError:
+        return template('html/register', error="O nome de usuário já existe. Tente outro.")
+    except Exception as e:
+        return template('portal', error=f"Erro inesperado: {e}")
 
+@app.route('/delete_account_confirm/<session_id>', method='GET')
+def delete_account_confirm(session_id):
+    return template('app/views/html/delete_account_confirm', session_id=session_id)
 
-
+@app.route('/delete_account_confirm', method='POST')
+def delete_account_confirm(): 
+    ctl.delete_account_confirm()
+    return redirect('/portal')
 ##### --- tarefaas 
 
 @app.route('/pagina/add_task', method='POST')
@@ -98,7 +109,9 @@ def delete_task():
         return redirect('/pagina')
     return "Erro ao excluir tarefa."
 
-
+@app.route('/dados', method = ['GET','POST'])
+def dados():
+    return ctl.render('dados')
 
 
 if __name__ == '__main__':

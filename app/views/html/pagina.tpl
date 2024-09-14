@@ -13,13 +13,17 @@
 
 
 
-     <ul>
-            <li>{{tasks}}</li>
- 
-
-                    
-                
-    </ul>
+<ul>
+    % for task in tasks:
+        <li>
+            {{ task['description'] }}
+            <form action="/pagina/delete_task" method="post" style="display:inline;">
+                <input type="hidden" name="task_id" value="{{ task['id'] }}">
+                <button type="submit">Excluir</button>
+            </form>
+        </li>
+    % end
+</ul>
 
         <!-- Formulário para adicionar novas tarefas -->
         <form action="/pagina/add_task" method="post">
@@ -41,4 +45,3 @@
     </div>
 </body>
 </html>
-

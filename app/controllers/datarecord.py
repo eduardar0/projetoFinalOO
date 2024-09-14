@@ -6,7 +6,7 @@ from app.models.user_account import UserAccount
 class DataRecord:
     """Classe responsável por gerenciar a autenticação e os dados de usuários."""
 
-    def __init__(self, db_name='app/controllers/db/user_accounts.db'):
+    def __init__(self, db_name='/mnt/c/Users/Joelma/Documents/bonusPF/bmvc/app/controllers/db/user_accounts.db'):
         """Inicializa a conexão com o banco de dados SQLite e cria a tabela de usuários se ela não existir."""
         # Gera o caminho absoluto para o banco de dados
         self.db_name = os.path.abspath(db_name)
@@ -57,19 +57,15 @@ class DataRecord:
                 print(f"Erro: O usuário {username} já está registrado.")
                 raise
 
-    def get_all_users(self, session_id, admin_only):
+    def get_all_users(self, session_id):
         """Retorna todos os usuários do banco de dados, apenas para administradores."""
-        if admin_only:
-            if session_id is None or not self.is_admin(session_id):
-              print("Acesso negado: apenas administradores podem visualizar todos os usuários.")
-              return []
+        if not self.is_admin(session_id):
+            print("Acesso negado: apenas administradores podem visualizar todos os usuários.")
+            return []
         #### cRud (READ)
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
-            if admin_only:
-               cursor.execute("SELECT * FROM users")
-            else:
-                cursor.execute("SELECT username, password FROM users")
+            cursor.execute("SELECT * FROM users")
             return cursor.fetchall()
         
     def get_username(self, session_id): ########
@@ -105,26 +101,6 @@ class DataRecord:
             cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
             conn.commit()
             print(f"Usuário {user_id} removido com sucesso.")
-
-    def delete_account(self, session_id ):
-        """Remove a conta do usuário logado"""
-        user = self.getCurrentUser(session_id)
-        if user:
-            username = user.username
-            with sqlite3.connect(self.db_name) as conn:
-               cursor = conn.cursor()
-               cursor.execute("DELETE FROM users WHERE username = ?", (username,))
-               conn.commit()
-               print(f"Usuário {username} excluído com sucesso!")
-
-               if session_id in self.__authenticated_users:
-                    del self.__authenticated_users[session_id]
-                    print(f"Session ID '{session_id}' removido da lista de usuários autenticados")
-        else:
-            print("Nenhum usuário logado para exclusão")
-    
-
-
 
     def checkUser(self, username, password):
         """Verifica se o usuário está no banco de dados e gera um ID único para a sessão."""
@@ -168,6 +144,22 @@ class DataRecord:
         if session_id in self.__authenticated_users:
             del self.__authenticated_users[session_id]
 
+    def delete_account(self, session_id ):
+        """Remove a conta do usuário logado"""
+        user = self.getCurrentUser(session_id)
+        if user:
+            username = user.username
+            with sqlite3.connect(self.db_name) as conn:
+               cursor = conn.cursor()
+               cursor.execute("DELETE FROM users WHERE username = ?", (username,))
+               conn.commit()
+               print(f"Usuário {username} excluído com sucesso!")
+
+               if session_id in self.__authenticated_users:
+                    del self.__authenticated_users[session_id]
+                    print(f"Session ID '{session_id}' removido da lista de usuários autenticados")
+        else:
+            print("Nenhum usuário logado para exclusão")
     def getUserPassword(self, username):
         """Retorna a senha do usuário com base no nome de usuário."""
         with sqlite3.connect(self.db_name) as conn:
@@ -175,11 +167,6 @@ class DataRecord:
             cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
             password = cursor.fetchone()
             return password[0] if password else None
-        
-   
-
-
-
 #sqlite3 /mnt/c/Users/Joelma/Documents/bonusPF/bmvc/app/controllers/db/user_accounts.db
 
 ####funções para as tarefas
@@ -219,31 +206,34 @@ class DataRecord:
 
     def delete_task(self, session_id, task_id):
         """Remove uma tarefa associada ao usuário autenticado."""
-        user = self.getUserSessionId(session_id)
-        if user:
-            with sqlite3.connect(self.db_name) as conn:
-                cursor = conn.cursor()
-                cursor.execute("DELETE FROM tasks WHERE id = ? AND user_id = ?", 
-                            (task_id, self.get_user_id(user.username)))
-                conn.commit()
-                print(f"Tarefa {task_id} removida para o usuário {user.username}.")
-        else:
-            print("Erro: Usuário não autenticado.")
+        try:
+            user_name = self.getUserName(session_id)  # Obtém o nome do usuário pela sessão
+            if user_name:
+                with sqlite3.connect(self.db_name) as conn:
+                    cursor = conn.cursor()
+                    # Verifica se o task_id pertence ao usuário autenticado
+                    cursor.execute("DELETE FROM tasks WHERE id = ? AND user_id = ?", 
+                                (task_id, self.get_user_id(user_name)))
+                    conn.commit()
+                    print(f"Tarefa {task_id} removida para o usuário {user_name}.")
+            else:
+                print("Erro: Usuário não autenticado.")
+        except Exception as e:
+            print(f"Erro ao excluir tarefa: {e}")
             
     def get_tasks(self, session_id):
-        """Retorna todas as descrições das tarefas associadas ao usuário autenticado."""
+        """Retorna todas as tarefas (com ID e descrição) associadas ao usuário autenticado."""
         try:
             user_name = self.getUserName(session_id)
             if user_name:
                 with sqlite3.connect(self.db_name) as conn:
                     cursor = conn.cursor()
-
                     user_id = self.get_user_id(user_name)
                     if user_id:
-                        # Busca apenas a coluna de descrição das tarefas (description)
-                        cursor.execute("SELECT description FROM tasks WHERE user_id = ?", (user_id,))
-                        # Extrai apenas as descrições das tarefas, sem os números
-                        return [row[0] for row in cursor.fetchall()]
+                        # Busca o id e a descrição das tarefas
+                        cursor.execute("SELECT id, description FROM tasks WHERE user_id = ?", (user_id,))
+                        # Retorna uma lista de dicionários com id e descrição
+                        return [{"id": row[0], "description": row[1]} for row in cursor.fetchall()]
                     else:
                         print("Erro: ID do usuário não encontrado.")
                         return []
@@ -253,5 +243,4 @@ class DataRecord:
         except Exception as e:
             print(f"Erro ao acessar o banco de dados: {e}")
             return []
-
 
