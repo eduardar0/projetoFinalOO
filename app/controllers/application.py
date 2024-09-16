@@ -9,7 +9,9 @@ class Application:
             'portal': self.portal,
             'register': self.register_page,
             'dados': self.dados,
-            'delete_account_confirm': self.delete_account_confirm
+            'delete_account_confirm': self.delete_account_confirm, 
+            'home': self.home,
+            'edit_password': self.edit_password
         }
         self.model = DataRecord()
         self.__current_username = None
@@ -35,6 +37,9 @@ class Application:
         return self.model.get_username(session_id)
     
 
+    def home(self):
+        return template('app/views/html/home')
+
     def login(self):
         username = request.forms.get('username')
         password = request.forms.get('password')
@@ -56,7 +61,7 @@ class Application:
                 password = self.model.getUserPassword(username)
                 return template('app/views/html/dados', current_user=user, username=username, password=password)
         return template('app/views/html/pagina', current_user=None, username=None, password=password)
-    
+     
     def delete_account_confirm(self):
         session_id = request.get_cookie('session_id')  # Obtém o ID da sessão do cookie
         if session_id:
@@ -65,7 +70,24 @@ class Application:
         else:
             return "Você não está logado."
 
+    def edit_password(self):
+        session_id = self.get_session_id()
+        if session_id:
+           if request.method == 'POST':
+              old_password = request.forms.get('old_password')
+              new_password = request.forms.get('new_password')
+              confirm_new_password = request.forms.get('confirm_new_password')
 
+              if new_password != confirm_new_password:
+                  return template('app/views/html/edit_password', error="As novas senhas não coincidem.")
+              if self.model.update_password(session_id, old_password=old_password, new_password=new_password):
+                  return redirect('/portal')
+           else:
+               return template('app/views/html/edit_password', error="Senha antiga incorreta ou erro ao atualizar a senha")
+        return template('app/views/html/edit_password')
+
+
+    
     def portal(self):
         if request.method == 'POST':
             username = request.forms.get('username')
@@ -73,7 +95,7 @@ class Application:
             session_id, username = self.authenticate_user(username, password)
             if session_id:
                 response.set_cookie('session_id', session_id, path='/')
-                return template('html/pagina.tpl', current_user=user)
+                return template('html/pagina.tpl', current_user=username)
             else:
                 return template('html/portal', error="Login inválido.")
         return template('html/portal')
