@@ -16,8 +16,8 @@
 
         <div class="button-container">
             <!-- Formulário para editar dados -->
-            <form action="/edit" method="get">
-                <button type="submit">Editar dados</button>
+            <form action="/edit_password" method="get">
+                <button type="submit">Editar senha</button>
             </form>
 
             <!-- Formulário para deletar conta -->
