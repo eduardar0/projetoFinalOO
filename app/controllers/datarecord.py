@@ -6,7 +6,7 @@ from app.models.user_account import UserAccount
 class DataRecord:
     """Classe responsável por gerenciar a autenticação e os dados de usuários."""
 
-    def __init__(self, db_name='/mnt/c/Users/Joelma/Documents/bonusPF/bmvc/app/controllers/db/user_accounts.db'):
+    def __init__(self, db_name='.\\db\\user_accounts.db'):
         """Inicializa a conexão com o banco de dados SQLite e cria a tabela de usuários se ela não existir."""
         # Gera o caminho absoluto para o banco de dados
         self.db_name = os.path.abspath(db_name)
@@ -27,12 +27,12 @@ class DataRecord:
                         is_admin INTEGER DEFAULT 0
                     )
                 ''')
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS tasks (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    description TEXT NOT NULL,
-                    FOREIGN KEY(user_id) REFERENCES users(id)
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS tasks (
+                      id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      user_id INTEGER NOT NULL,
+                      description TEXT NOT NULL,
+                      FOREIGN KEY(user_id) REFERENCES users(id)
                 )
             ''')
             conn.commit()
@@ -167,6 +167,32 @@ class DataRecord:
             cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
             password = cursor.fetchone()
             return password[0] if password else None
+        
+    def update_password(self, session_id, old_password, new_password):
+        """Atualiza a senha do usuário autenticado, se a senha antiga estiver correta."""
+        user = self.getCurrentUser(session_id)  # Obtém o usuário autenticado com base no ID da sessão
+        
+        if user:
+            # Verifica se a senha antiga fornecida está correta
+            stored_password = self.getUserPassword(user.username)  # Obtém a senha armazenada no banco de dados
+            
+            if stored_password == old_password:
+                # Atualiza a senha do usuário
+                with sqlite3.connect(self.db_name) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE users SET password = ? WHERE username = ?", (new_password, user.username))
+                    conn.commit()
+                    print("Senha atualizada com sucesso.")
+                
+                # Atualiza a senha no objeto UserAccount para manter a consistência na aplicação
+                user.password = new_password
+                return True
+            else:
+                print("Erro: A senha antiga fornecida está incorreta.")
+                return False
+        else:
+            print("Erro: Usuário não autenticado.")    
+            return False
 #sqlite3 /mnt/c/Users/Joelma/Documents/bonusPF/bmvc/app/controllers/db/user_accounts.db
 
 ####funções para as tarefas
