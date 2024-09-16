@@ -10,6 +10,11 @@ ctl = Application()
 # Configura o caminho para a pasta de templates
 TEMPLATE_PATH.insert(0, './app/views')
 
+@app.route('/')
+@app.route('/home', get='GET')
+def home_getter():
+    return ctl.render('home')
+
 @app.route('/static/<filepath:path>')
 def serve_static(filepath):
     return static_file(filepath, root='./app/static')
@@ -39,7 +44,7 @@ def login():
 def action_portal():
     username = request.forms.get('username')
     password = request.forms.get('password')
-    session_id, user_name = ctl.authenticate_user(username, password)
+    session_id, username = ctl.authenticate_user(username, password)
     
     print(f"Session ID: {session_id}")  # Verifica se o ID de sessão está sendo gerado
 
@@ -85,6 +90,7 @@ def register_user():
     except Exception as e:
         return template('html/portal', success_message="Usuário cadastrado com sucesso.")
 
+
 @app.route('/delete_account_confirm/<session_id>', method='GET')
 def delete_account_confirm(session_id):
     return template('app/views/html/delete_account_confirm', session_id=session_id)
@@ -116,6 +122,14 @@ def delete_task():
 @app.route('/dados', method = ['GET','POST'])
 def dados():
     return ctl.render('dados')
+
+@app.route('/edit_password', method='GET')
+def edit_password():
+    return ctl.render('edit_password')
+
+@app.route('/edit_password', method='POST')
+def update_password():
+    return ctl.render('edit_password')
 
 
 if __name__ == '__main__':
