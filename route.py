@@ -76,7 +76,7 @@ def register_user():
     
     try:
         # Tenta registrar o usuário
-        ctl.model.book(None, username, password, is_admin=False)  # Assumindo que book cria o usuário
+        ctl.model.book(username, password, is_admin=False)  # Assumindo que book cria o usuário
         
         # Autentica o usuário logo após o registro
         session_id = ctl.model.checkUser(username, password)
