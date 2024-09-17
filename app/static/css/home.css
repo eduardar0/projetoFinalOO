@@ -1,0 +1,99 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #fce4ec; /* Fundo rosa claro */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Container Principal */
+.container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    text-align: center;
+    width: 100%;
+    max-width:700px;
+    animation: fadeIn 1s ease-in-out;
+    margin-top: auto;
+}
+
+/* Títulos */
+h1 {
+    color: #e91e63; /* Rosa forte para os títulos */
+    font-size: 32px;
+    margin-top: auto;
+    margin-bottom: 20px;
+}
+
+h4 {
+    color: #555;
+    font-size: 25px;
+    margin-bottom: 27px;
+}
+
+/* Imagem */
+img {
+    border-radius: 50%;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+img:hover {
+    transform: scale(1.05); /* Leve zoom ao passar o mouse */
+}
+
+/* Botões */
+button {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px;
+    width: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #d81b60;
+}
+
+button:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(233, 30, 99, 0.5);
+}
+
+/* Parágrafo */
+p {
+    color: #555;
+    margin-top: 20px;
+    font-size: 20px;
+}
+
+/* Animação de FadeIn */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
