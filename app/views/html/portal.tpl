@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="/static/css/styles.css"> <!-- Link para o arquivo CSS -->
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.png" />
+    <link rel="stylesheet" href="/static/css/portal.css">
+    <title>.:: Pink List (Login) ::.</title>
+
 </head>
 <body>
     <div class="container">
@@ -22,11 +24,13 @@
                     <label for="password">Senha:</label>
                     <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
                 </div>
+                <div class="button-container">
                 <button type="submit">Entrar</button>
+
             </form>
 
             <!-- Botão para cadastro de novo usuário -->
-            <div class="form-group">
+            <div class="button-container">
                 <p>Não tem uma conta?</p>
                 <a href="/register"><button type="button">Cadastrar novo usuário</button></a>
             </div>
